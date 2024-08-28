@@ -14,6 +14,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static com.nttdata.core.DriverManager.getDriver;
 import static com.nttdata.core.DriverManager.screenShot;
@@ -55,29 +56,84 @@ public class LoginStepsDef {
         screenShot();
     }
 
+
     @Y("agrego {int} unidades del primer producto al carrito")
-    public void agregoUnidadesDelPrimerProductoAlCarrito(int unidades) {
+    public void agregoUnidadesDelPrimerProductoAlCarrito(int unidades) throws InterruptedException {
+      // driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(444));
         WebElement producto1 = driver.findElement(By.xpath("//img[@src='https://qalab.bensg.com/store/1-home_default/hummingbird-printed-t-shirt.jpg']"));
         producto1.click();
-        WebElement agregar = driver.findElement(By.cssSelector("button[data-button-action='add-to-cart']"));
+        WebElement agregar1 = driver.findElement(By.xpath("//input[@id='quantity_wanted']"));
+        agregar1.clear();
+        screenShot();
+        //agregar1.sendKeys(String.valueOf(unidades));
+        WebElement agregar2 = driver.findElement(By.xpath("//button[@class='btn btn-touchspin js-touchspin bootstrap-touchspin-up']"));
+        agregar2.click();
+        WebElement agregar = driver.findElement(By.xpath("//button[@data-button-action='add-to-cart']"));
+        Thread thread = new Thread();
         agregar.click();
-        for (int i = 0; i < unidades; i++) {
+        screenShot();
+        //thread.sleep(10000);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(400));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(400));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h4[@class='modal-title h6 text-sm-center']")));
 
-            agregar.click();
-
-            screenShot();
-        }
 
     }
 
-    @Entonces("valido en el popup la confirmación del producto agregado")
-    public void validoEnElPopupLaConfirmaciónDelProductoAgregado() {
+    @Entonces("Entonces valido en el popup la confirmación del producto agregado")
+    public void entoncesValidoEnElPopupLaConfirmaciónDelProductoAgregado() {
         WebElement popup = driver.findElement(By.xpath("//h4[@class='modal-title h6 text-sm-center']"));
-        WebElement mensaje = driver.findElement(By.xpath("//h4[@class='modal-title h6 text-sm-center'],'Producto añadido correctamente a su carrito de compra')]"));
+        popup.getText();
+        if (popup.getText()=="Producto añadido correctamente a su carrito de compra"){
+            screenShot();
+        }
+       // WebElement mensaje = driver.findElement
+        //(By.xpath("//h4[@class='modal-title h6 text-sm-center'],'Producto añadido correctamente a su carrito de compra')]"));
         Assertions.assertTrue(popup.isDisplayed());
-        Assertions.assertTrue(mensaje.isDisplayed());
+       // Assertions.assertTrue(mensaje.isDisplayed());
         screenShot();
+    }
 
+    @Y("valido en el popup que el monto total sea calculado correctamente")
+    public void validoEnElPopupQueElMontoTotalSeaCalculadoCorrectamente()
+    {
+        WebElement total = driver.findElement(By.xpath("//p[@class='product-total']"));
+        total.getText();
+        if (total.getText()=="S/ 38.24"){
+            screenShot();
+        }
+        Assertions.assertTrue(total.isDisplayed());
+        screenShot();
+    }
+
+    @Cuando("finalizo la compra")
+    public void finalizoLaCompra()  {
+        WebElement finalizar = driver.findElement(By.partialLinkText("FINALIZAR COMPRA"));
+        finalizar.click();
+        screenShot();
+    }
+
+    @Entonces("valido el titulo de la pagina del carrito")
+    public void validoElTituloDeLaPaginaDelCarrito() {
+
+        WebElement titulo = driver.findElement(By.xpath("//h1[@class='h1']"));
+
+        if (titulo.getText()=="CARRITO"){
+            screenShot();
+        }
+        Assertions.assertTrue(titulo.isDisplayed());
+        screenShot();
+    }
+
+    @Y("vuelvo a validar el calculo de precios en el carrito")
+    public void vuelvoAValidarElCalculoDePreciosEnElCarrito() {
+        WebElement calculo = driver.findElement(By.xpath("//div[@class='cart-summary-line cart-total']"));
+
+        if (calculo.getText()=="S/ 38.24"){
+            screenShot();
+        }
+        Assertions.assertTrue(calculo.isDisplayed());
+        screenShot();
     }
 }
 
